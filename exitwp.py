@@ -292,7 +292,7 @@ def write_jekyll(data, target_format):
             yaml_header['published'] = False
 
         if i['type'] == 'post':
-            i['uid'] = get_item_uid(i, date_prefix=True)
+            i['uid'] = get_item_uid(i, date_prefix=False)
             fn = get_item_path(i, dir='_posts')
             out = open_file(fn)
             yaml_header['layout'] = 'post'
@@ -341,13 +341,15 @@ def write_jekyll(data, target_format):
                         continue
                     tax_out[t_name].append(tvalue)
 
-            out.write('---\n')
             if len(yaml_header) > 0:
                 out.write(toyaml(yaml_header))
             if len(tax_out) > 0:
-                out.write(toyaml(tax_out))
+                for tax_type, tax_values in tax_out.items():
+                    if tax_type == 'categories':
+                        tax_type = 'category'
+                    out.write("%s: %s\n" % (tax_type, ', '.join(tax_values)))
+            out.write('\n')
 
-            out.write('---\n\n')
             try:
                 out.write(html2fmt(i['body'], target_format))
             except:
